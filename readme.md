@@ -13,15 +13,27 @@
 * Added FacebookToYoutube to GitHub (07/10/2012)
 
 ### In Development
+* Store youtube IDs on a MySQL database
+* Webpage front-end, display links downloaded and in database.
 * OOP implementation of Facebook downloader, to generalize
 * OOP implementation of PHP code
 * Automatically create new playlist when current one is full
 
 ## Installation
 
+### Dependencies
 * Python: mechanize and HTMLParser needed
 * PHP: Zend Gdata needed
 * Uncomment extension=php_openssl.dll in your php.ini file to remove the following error: 'Unable to find the socket transport "ssl" – did you forget to enable it when you configured PHP?''
+
+### Use
+* facebook_parser.py is the main file, it authenticates a Facebook session, downloads the webpage and parses it for Youtube videos.
+* /php/youtube.php contains a set of functions to access the Youtube API.
+* /php/model.php contains python list to PHP array parser.
+* /php/controlelr.php and /php/view.php do nothing at the moment.
+
+### User Specific Data
+* There are several areas in the code, to be marked EDIT_HERE, where information specific to your accounts should be entered.
 
 ##License
 Copyright (C) 2012 Biafra Ahanonu <bahanonu@gmail.com>
