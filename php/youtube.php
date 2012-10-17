@@ -1,15 +1,15 @@
 <?php
-#Biafra Ahanonu
-#07.10.2012
 class youtube{
 	#Set of functions to connect, read and modify youtube playlists
 	#Code borrowed from https://developers.google.com/youtube/2.0/developers_guide_php and modified into functions
 	public static function setYoutubeConnection(){
 		// include_path('/Zend/library');
 		// include_path('/Zend');
+
+		#Obtain include paths, to modify
 		$previousPaths = ini_get('include_path');
 		#Zend Location
-		$ZendLocation = ';YOUR_DIR\Zend\library';
+		$ZendLocation = ZEND_LOCATION;
 		#Update the include path
 		ini_set('include_path', $previousPaths.$ZendLocation);
 		
@@ -26,20 +26,20 @@ class youtube{
 		$authenticationURL= 'https://www.google.com/accounts/ClientLogin';
 		$httpClient = 
 		  Zend_Gdata_ClientLogin::getHttpClient(
-		              $username = 'username@gmail.com',
-		              $password = 'yourPassword',
+		              $username = YOUTUBE_USERNAME,
+		              $password = YOUTUBE_PASSWORD,
 		              $service = 'youtube',
 		              $client = null,
 		              #A short string identifying your application
-		              $source = 'yourClient', 
+		              $source = APP_SOURCE, 
 		              $loginToken = null,
 		              $loginCaptcha = null,
 		              $authenticationURL);
 
 		#Get a developer key and add string here
-		$developerKey = 'yourDevKey';
-		$applicationId = 'AppName';
-		$clientId = 'ClientName';
+		$developerKey = DEV_KEY;
+		$applicationId = APP_ID;
+		$clientId = CLIENT_ID;
 
 		#Setup new youtube object
 		$yt = new Zend_Gdata_YouTube($httpClient, $applicationId, $clientId, $developerKey);
@@ -59,7 +59,8 @@ class youtube{
 		#Search for playlist with same name, if exist, exit function (avoid duplicates)
 		foreach ($playlistListFeed as $playlistListEntry) {
 			if ($playlistListEntry->title->text==$playlistName) {
-				echo 'Already playlist named: '.$playlistName;
+				echo 'Already playlist named: '.$playlistName.'
+				';
 				return;
 			}
 		}
@@ -133,7 +134,6 @@ class youtube{
 			$playlistVideoIDs[] = $playlistVideoEntry->getVideoId();
 			// echo $playlistVideoEntry->getVideoId();
 		}
-		
 		return $playlistVideoIDs;
 	}
 }

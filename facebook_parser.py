@@ -1,31 +1,18 @@
 #!/Python27/env python
 #Biafra Ahanonu
-#2012.10.04
+#2012.10.16
 #Based on:
 #http://ubuntuincident.wordpress.com/2011/11/08/download-login-protected-pages-with-python-using-mechanize-and-splinter-part-3/
-#NEED: Turn into true object so people can call this for multiple websites
+#NEED: Wrap functions inside class to make proper object
 
 #Import dependencies, must have mechanize installed
 import mechanize,os,re
-# from array import *
 #ParseResponse used as a check for form data on a page
 from mechanize import ParseResponse, urlopen, urljoin
+#To help us crawl through downloaded page's content
 from HTMLParser import HTMLParser
-
-#Login page, use mobile Facebook, has simpler HTML source
-LOGIN_URL = 'http://m.facebook.com/login/'
-
-#Page to be crawled
-CRAWL_URL = 'URL'
-
-#Ideally login information is encrypted and pulled from another source, implement later
-#Login information for facebook
-USERNAME = ''
-#Facebook password
-PASSWORD = ''
-
-#Debug, 0 = off, 1 = on
-DEBUG_OUTPUT = 1
+#Import User settings, setting variables are CAPITALIZED
+from settings import *
 
 def getURLFormInformation():
     #Small function to craw a web page and print all information about forms on the page, for debug purposes
@@ -45,7 +32,7 @@ def getURLFormInformation():
     os.system('pause')
 
 def getFacebookPage():
-    #Opens secure connection to facebook and downloads page
+    #Opens authenticated connection to Facebook and downloads page
 
     #Setup mechanize browser
     browser = mechanize.Browser()
@@ -58,7 +45,7 @@ def getFacebookPage():
     browser.open(LOGIN_URL)
     print 'Login page: connected!'
 
-    #Select the form, nr=0 means to use the first form you find, else enter the name='form ID name'
+    #Select the form, nr=0 means to use the first form you find, else enter the name='form html id name'
     browser.select_form(nr=0)# name="login_form"
 
     #Fill the username and password in the form
@@ -83,11 +70,8 @@ def getFacebookPage():
         if 'Facebook' in req.get_data():
             print 'Logged out!'
             sepline()
-    # HTML source of the page
-    # print res.get_data()   
-    # instantiate the parser and fed it some HTML
-    # browser.follow_link('https://m.facebook.com/logout.php')
 
+    #Return HTML source
     return result.get_data()
 
 class FacebookHTMLParser(HTMLParser):
@@ -96,23 +80,26 @@ class FacebookHTMLParser(HTMLParser):
     #Does not return anything, call variables from object, they are public
 
     #Setup variables as public
+    #Youtube URL
     youtubeBaseVideo = []
+    #Video ID
     youtubeVideo = []
     associateUrlTitleSwitch = 0
     TempUrlTitle = ''
+    #List of actual title of videos
     UrlTitles = []
 
     def handle_starttag(self, tag, attrs):
-        # print tag,attrs
-        # if attrs[0]=='storyAttachmentTitle':
+        #Each time HTMLParser sees a start tag, this function is called
+
         for item in attrs:
             #Facebook uses the following class to ID attachment titles
             # if item[1]=='storyAttachmentTitle':
             #     #Switch to state where we will record the title when calling handle_data
             #     self.associateUrlTitleSwitch = 1
-                # print item[1]
+            #     print item[1]
 
-            #This will appear if you've found a youtube link
+            #Check and see if found Youtube link
             if '%2Fwatch%3Fv%3' in item[1]:
                 #Regular expression for youtube URLs in raw html
                 go = re.search('v%3D[0-9A-Za-z_-]*(&|%26)',item[1])
@@ -130,8 +117,10 @@ class FacebookHTMLParser(HTMLParser):
 
                 #Open a mechanize browser and get video title
                 br = mechanize.Browser()
+                #replace www with m for faster, but then need to parse out 'YouTue - '
                 br.open('http://www.youtube.com/watch?v='+youtubeURL)
                 youtubeTitle = br.title()
+                # youtubeTitle.replace('YouTube ','')
 
                 #Remove commas so the PHP regexp isn't messed up later
                 youtubeTitle = youtubeTitle.replace(',','')
@@ -147,10 +136,10 @@ class FacebookHTMLParser(HTMLParser):
                 # self.TempUrlTitle = ''
 
     def handle_endtag(self, tag):
-        # print tag
         pass
     def handle_data(self, data):
         pass
+        #Ignore below
         #If just encountered the URL title, record it then switch out of state
         # print data
         # if self.associateUrlTitleSwitch == 1:
@@ -160,6 +149,7 @@ class FacebookHTMLParser(HTMLParser):
         # if 'watch?' in data[0:len('watch?')]:
         #     pass
             # print 'http://www.youtube.com/'+data
+            # http://www.youtube.com/watch?v=OBl4pp0Sfko
             # self.youtubeBaseVideo.append('http://www.youtube.com/'+data)
             # # print self.youtubeBaseVideo
             # self.youtubeVideo.append(data)
@@ -167,6 +157,7 @@ class FacebookHTMLParser(HTMLParser):
             # self.TempUrlTitle = ''
 
 def sendDataToURL(inputData):
+    #Sends python data to PHP script
     #Thanks TheBestJohn for a good starting point.
 
     #Import urllib libraries
@@ -179,7 +170,7 @@ def sendDataToURL(inputData):
     dataToSend=urllib.urlencode(dataToSend)
 
     #URL to send POST data to
-    path='YOUR_URL/index.php'
+    path=POST_URL
 
     #Send the data
     req=urllib2.Request(path, dataToSend)
@@ -199,19 +190,27 @@ def sepline():
 def writeDataToFile(inputData):
     #Raw HTML written to file for later use or debug
 
-    f = open('raw_html.txt','w')
+    f = open(DATA_FILE,'w')
     f.write(inputData)
     # html2text.html2text(inputData)
     f.close()
 
 def writeDataToHTML(URLs,Titles):
     #Creates an HTML file with links to videos
-
-    f = open('links.html','w')
+    
+    return
+    f = open(HTML_FILE,'w')
     TitleIterator = iter(Titles)
     for URL in URLs:
         Title = TitleIterator.next()
-        f.write('<a href=\''+URL+'\'>'+Title+'</a><br>')
+        try:
+            f.write('<a href=\''+URL+'\'>'+Title+'</a><br>')
+        except UnicodeDecodeError:
+            raise
+        else:
+            f.write('<a href=\''+URL+'\'>Invalid</a><br>')
+        finally:
+            pass
     f.close()
 
 def main():
@@ -224,7 +223,7 @@ def main():
     parser = FacebookHTMLParser()
 
     #Import raw html file 
-    # f = open('raw_html.txt','r')
+    # f = open('c3_data.txt','r')
     # facebookData = f.read()
     # print facebookData
 
@@ -235,6 +234,7 @@ def main():
     if DEBUG_OUTPUT == 1:
         sepline()
         print parser.youtubeBaseVideo
+        print parser.youtubeVideo
         print parser.UrlTitles
 
     #Send data to php script for processing
@@ -246,9 +246,9 @@ def main():
     #Create webpage with list of links
     writeDataToHTML(parser.youtubeBaseVideo,parser.UrlTitles)
 
-    # os.system('pause')
     sepline()
     print 'Done!'
+    os.system('pause')
 
 #We are in main script, start
 if __name__ == "__main__":

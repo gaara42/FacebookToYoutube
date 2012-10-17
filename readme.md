@@ -10,14 +10,14 @@
 * Automatically add videos to youtube
 
 ## What's New
-* Added FacebookToYoutube to GitHub (07/10/2012)
+* Added FacebookToYoutube to GitHub (2012.10.07)
+* Automatically create new playlist when current one is full (2012.10.16)
 
 ### In Development
 * Store youtube IDs on a MySQL database
 * Webpage front-end, display links downloaded and in database.
 * OOP implementation of Facebook downloader, to generalize
 * OOP implementation of PHP code
-* Automatically create new playlist when current one is full
 
 ## Installation
 

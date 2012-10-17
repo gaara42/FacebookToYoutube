@@ -1,30 +1,21 @@
 <?php
 class model{
 	#Partially implemented
-	public static function pythonStringToPHPArray($input){
-		$inputClean = str_replace(' u', '', $input);
-		$inputClean = str_replace('[u', '', $inputClean);
-		$inputClean = str_replace(']', '', $inputClean);
-		// $facebookDataClean = str_replace('[', '', $facebookDataClean);
-		$inputArray = preg_split('\',\'', $inputClean);
-		return $inputArray;
-	}	
 	public static function connectDatabase(){
 		#Determines if online (dev) or online
 		#Change username, database, etc. according to particular server
 		$dir = getcwd();
-		#Some local directory to diff btwn online and off
-		$localDir="";
-		if(strpos($dir,$localDir)){
-			$database = "";
-			$username = "root";
-			$password = "";
-			$host = "localhost";
+		$categories=LOCAL_ID;
+		if(strpos($dir,$categories)){
+			$database = MYSQL_DATABASE_LOCAL;
+			$username = MYSQL_USERNAME_LOCAL;
+			$password = MYSQL_PASSWORD_LOCAL;
+			$host = MYSQL_HOST_LOCAL;
 		}else{
-			$database = "";
-			$username = "";
-			$password = "";
-			$host = "";
+			$database = MYSQL_DATABASE_ONLINE;
+			$username = MYSQL_USERNAME_ONLINE;
+			$password = MYSQL_PASSWORD_ONLINE;
+			$host = MYSQL_HOST_ONLINE;
 		}
 		try {
 			$pdo = new PDO("mysql:host=$host;dbname=$database", $username, $password);
@@ -35,36 +26,16 @@ class model{
 			echo 'ERROR: ' . $e->getMessage();
 		}
 	}
-	public static function retrieveData($pdo,$table,$draft,$id_list){
-		//Retrieves
-		$variables = array(
-			'idList' => $id_list,
-			'draft' => $draft
-			);
+	public static function pythonStringToPHPArray($input){
+		#Converts a python list to a PHP array
 
-	    $stmt = $pdo->prepare("SELECT * FROM $table WHERE ID IN(:idList) AND Draft = :draft");
-	    $stmt->execute($variables);
-	    $data = array();
-	    while($row = $stmt->fetch()) {
-	        $data[]=(object) $row;
-	    }
-		return $data;
+		$inputClean = str_replace(' u', '', $input);
+		$inputClean = str_replace(', ', ',', $inputClean);
+		$inputClean = str_replace('[u', '', $inputClean);
+		$inputClean = str_replace('[', '', $inputClean);
+		$inputClean = str_replace(']', '', $inputClean);
+		$inputArray = preg_split('\',\'', $inputClean);
+		return $inputArray;
 	}
-	public static function setData($pdo,$table,$draft,$id_list){
-		//Retrieves
-		$variables = array(
-			'idList' => $id_list,
-			'draft' => $draft
-			);
-		// INSERT INTO $table (ID,Title,youtubeID,youtubeURL) VALUES (:id,:title,:youtubeID,:youtubeURL) ON DUPLICATE KEY UPDATE col1=0, col2=col2+1
-	    $stmt = $pdo->prepare("SELECT * FROM $table WHERE ID IN(:idList) AND Draft = :draft");
-	    $stmt->execute($variables);
-	    $data = array();
-	    while($row = $stmt->fetch()) {
-	        $data[]=(object) $row;
-	    }
-		return $data;
-	}
-
 }
 ?>
