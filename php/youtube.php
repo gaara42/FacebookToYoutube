@@ -123,17 +123,35 @@ class youtube{
 		#Returns an array with playlist video IDs
 		#NEED What if playlist is empty or doesn't exist? try/catch
 
-		#Obtain list of video objs in playlist
-		$playlistVideoFeed = $yt->getPlaylistVideoFeed($playlistToAddTo->getPlaylistVideoFeedUrl());
-
 		#Array to add video IDs to
 		$playlistVideoIDs = [];
 
-		#Cycle through each video and add its ID to the array
-		foreach ($playlistVideoFeed as $playlistVideoEntry) {
-			$playlistVideoIDs[] = $playlistVideoEntry->getVideoId();
-			// echo $playlistVideoEntry->getVideoId();
+		#Just get start-index so we can capture all videos
+		$scrawlFeed = array(1=>49,50=>99,100=>149,150=>199);
+
+		#Base URL that we will modify and pass to our youtube obj
+		$playlistURL = $playlistToAddTo->getPlaylistVideoFeedUrl();
+
+		#API only allows 50 result to be passed
+		#https://developers.google.com/youtube/2.0/reference#start-indexsp
+		$maxResult = 50;
+
+		foreach ($scrawlFeed as $startIndex => $value) {
+			echo 'Indexing...'.$startIndex.' | '.($startIndex+$maxResult).'---';
+
+			#Modify loop playlist URL
+			$loopPlaylistURL = $playlistURL."?start-index=$startIndex&max-results=$maxResult";
+
+			#Obtain list of video objs in playlist
+			$playlistVideoFeed = $yt->getPlaylistVideoFeed($loopPlaylistURL);
+
+			#Cycle through each video and add its ID to the array
+			foreach ($playlistVideoFeed as $playlistVideoEntry) {
+				$playlistVideoIDs[] = $playlistVideoEntry->getVideoId();
+				// echo $playlistVideoEntry->getVideoId();
+			}
 		}
+		
 		return $playlistVideoIDs;
 	}
 }
