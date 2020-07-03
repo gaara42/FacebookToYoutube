@@ -35,8 +35,8 @@
 ### User Specific Data
 * There are several areas in the code, to be marked EDIT_HERE, where information specific to your accounts should be entered.
 
-##License
-Copyright (C) 2012 Biafra Ahanonu <bahanonu@gmail.com>
+## License
+Copyright (C) 2012 Biafra Ahanonu
 
 "None are so hopelessly enslaved as those who falsely believe they are free."
                                               -Johann Wolfgang von Goethe
